@@ -370,12 +370,18 @@ class VideoProcessorService:
                             or face_crop.size == 0
                         ):
                             continue
+                        print(
+    f"[VideoProcessor] Generating embedding for frame {frame_idx}"
+)
 
                         embedding = (
                             face_engine.generate_embedding(
                                 face_crop
                             )
                         )
+                        print(
+    f"[VideoProcessor] Embedding generated for frame {frame_idx}"
+)
 
                         if (
                             not embedding
@@ -408,6 +414,9 @@ class VideoProcessorService:
                             (0, 32, 96),
                             2,
                         )
+                        print(
+    f"[VideoProcessor] Saving annotated frame {frame_idx}"
+)
 
                         saved_frame_url = (
                             storage.save_frame(
@@ -416,10 +425,16 @@ class VideoProcessorService:
                                 frame_idx,
                             )
                         )
+                        print(
+    f"[VideoProcessor] Frame {frame_idx} saved: {saved_frame_url}"
+)
 
                         # -------------------------------------
                         # MATCH FACE
                         # -------------------------------------
+                        print(
+    f"[VideoProcessor] Starting face matching for frame {frame_idx}"
+)
 
                         detection_results = (
                             matcher.evaluate_detected_faces(
@@ -438,6 +453,9 @@ class VideoProcessorService:
                                 },
                             )
                         )
+                        print(
+    f"[VideoProcessor] Face matching finished for frame {frame_idx}"
+)
 
                         if detection_results:
 
