@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: locateme-api
+    runtime: python
+    rootDir: backend
+
+    buildCommand: pip install -r requirements.txt
+
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+
+    healthCheckPath: /api/health
+
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+
+      - key: SUPABASE_KEY
+        sync: false
+
+      - key: SUPABASE_BUCKET_PHOTOS
+        value: photos
+
+      - key: SUPABASE_BUCKET_VIDEOS
+        value: cctv-videos
+
+      - key: SUPABASE_BUCKET_FRAMES
+        value: cctv-frames
+
+      - key: STORAGE_DIR
+        value: ./storage
+
+      - key: HOST
+        value: 0.0.0.0
+
+      - key: CORS_ORIGINS
+        value: http://localhost:3000,http://127.0.0.1:3000
