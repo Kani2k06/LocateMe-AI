@@ -1,0 +1,222 @@
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={theme:{extend:{"colors":{"on-primary-fixed-variant":"#3f465c","on-secondary":"#ffffff","primary-fixed":"#dae2fd","primary":"#000000","surface-tint":"#565e74","on-primary":"#ffffff","surface-container":"#eceef0","surface-variant":"#e0e3e5","on-error-container":"#93000a","secondary-container":"#d5e3fd","tertiary-fixed-dim":"#b7c8e1","on-surface-variant":"#45464d","on-tertiary":"#ffffff","surface-dim":"#d8dadc","surface-container-highest":"#e0e3e5","primary-container":"#131b2e","on-secondary-fixed":"#0d1c2f","on-tertiary-container":"#75859d","inverse-primary":"#bec6e0","secondary":"#515f74","inverse-surface":"#2d3133","on-tertiary-fixed":"#0b1c30","surface-container-high":"#e6e8ea","inverse-on-surface":"#eff1f3","surface-container-lowest":"#ffffff","outline":"#76777d","on-secondary-container":"#57657b","on-primary-container":"#7c839b","primary-fixed-dim":"#bec6e0","tertiary-container":"#0b1c30","surface-bright":"#f7f9fb","surface":"#f7f9fb","on-surface":"#191c1e","on-secondary-fixed-variant":"#3a485c","outline-variant":"#c6c6cd","on-background":"#191c1e","on-primary-fixed":"#131b2e","secondary-fixed-dim":"#b9c7e0","on-error":"#ffffff","error-container":"#ffdad6","tertiary-fixed":"#d3e4fe","background":"#f7f9fb","surface-container-low":"#f2f4f6","on-tertiary-fixed-variant":"#38485d","secondary-fixed":"#d5e3fd","tertiary":"#000000","error":"#ba1a1a"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"grid_columns":"12","gutter":"20px","margin_mobile":"16px","sm":"16px","xl":"48px","xs":"8px","lg":"32px","base":"4px","md":"24px","margin_desktop":"40px"},"fontFamily":{"display-lg":["Inter"],"headline-sm":["Inter"],"body-md":["Inter"],"headline-md":["Inter"],"label-bold":["Inter"],"label-sm":["Inter"],"body-lg":["Inter"],"mono-data":["jetbrainsMono"]},"fontSize":{"display-lg":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["20px",{"lineHeight":"28px","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-bold":["12px",{"lineHeight":"16px","letterSpacing":"0.05em","fontWeight":"600"}],"label-sm":["12px",{"lineHeight":"16px","fontWeight":"500"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"mono-data":["13px",{"lineHeight":"18px","fontWeight":"400"}]}}}}</script><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/></head><body class="bg-background font-body-md text-on-background"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest z-50 flex flex-col border-r border-outline-variant"><div class="p-lg flex items-center gap-xs border-b border-outline-variant"><img alt="LocateMe emblem" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBY1k_cNdlresEh7_pVBzPk_4gMTqeAjYL_dr9fHA8LaqDlfaEc5s49rmi15dJOhHkhv8ad7bsSVvCt6OQ0bG8EW_8w5IUJBAVxFasTXMY3E4XIh8msZFldQazQuhkFtg6Hh1OX85PJRorFG9SOvO4CGjtFeqoyWd8Om1uFtCSdvAem8XKYyANmZRfPw2gmOQF4k2W8kPHKQRnecQTvU4XYkMfgVSTNUPKs0IOLlwXz5fl2irOIBFdgjg"/><span class="font-headline-sm text-headline-sm text-primary tracking-tight">LocateMe</span></div><nav class="flex-1 px-sm py-md space-y-base overflow-y-auto" data-active-classes="bg-secondary-container text-on-secondary-container font-label-bold"><a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="dashboard" href="#"><span class="material-symbols-outlined">dashboard</span><span class="font-body-md">Dashboard</span></a><a aria-current="page" class="flex items-center gap-sm px-md py-sm rounded-lg transition-all bg-secondary-container text-on-secondary-container font-label-bold" data-path="missing-persons" href="#"><span class="material-symbols-outlined">person_search</span><span class="font-body-md">Missing Persons</span></a><a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="register-person" href="#"><span class="material-symbols-outlined">person_add</span><span class="font-body-md">Register Person</span></a><a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="cctv-analysis" href="#"><span class="material-symbols-outlined">videocam</span><span class="font-body-md">CCTV Analysis</span></a><a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="detection-results" href="#"><span class="material-symbols-outlined">biotech</span><span class="font-body-md">Detection Results</span></a><a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="alerts" href="#"><span class="material-symbols-outlined">notifications_active</span><span class="font-body-md">Alerts</span></a><a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="analytics" href="#"><span class="material-symbols-outlined">analytics</span><span class="font-body-md">Analytics</span></a><a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="settings" href="#"><span class="material-symbols-outlined">settings</span><span class="font-body-md">Settings</span></a></nav></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-outline-variant z-40 flex items-center justify-between px-lg"><div class="flex-1 max-w-xl"><div class="relative flex items-center"><span class="material-symbols-outlined absolute left-sm text-outline">search</span><input class="w-full pl-xl pr-md py-xs bg-surface-container-low border border-outline-variant rounded-lg text-body-md focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Search database, cases, or alerts..." type="text"/></div></div><div class="flex items-center gap-md"><button class="relative p-xs text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors"><span class="material-symbols-outlined">notifications</span><span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span></button><div class="flex items-center gap-sm pl-md border-l border-outline-variant"><div class="text-right hidden lg:block"><p class="font-label-bold text-on-surface">Command Admin</p><p class="text-label-sm text-on-surface-variant">Federal Bureau</p></div><img alt="Profile" class="w-9 h-9 rounded-full object-cover border border-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7enGws5anfvJp8C-4CNYwijbfBggsi1fStrYpNeQgXkalCCaGjo0W2ssmdUXJYuCQ6wkDQ1jlqUf4HzriqBnjFqrBEXRaYlLTrn_ORTlr3ohtTC0b_FMTeQtv556tPsGhf377aKZ1O9HoMtGpaj7gxd1zlNZX8AZvMswg-m1OCJg9hM-x121wSZxOdVQr8PaLr_RLoC0ahiYNT23sov_l7yB3NHWfjQiHp1id7qRwMQHFhIRhgFHY4w"/></div></div></header><main class="relative pt-16 min-h-screen"><div class="flex flex-col w-full p-lg gap-lg">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-md">
+<div class="flex flex-col gap-base">
+<h1 class="font-display-lg text-display-lg text-on-surface">Missing Persons Registry</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+        Centralized database for active and resolved missing person cases. Updated in real-time with cross-agency intel.
+      </p>
+</div>
+<div class="flex gap-sm w-full md:w-auto">
+<button class="flex-1 md:flex-none flex items-center justify-center gap-xs px-md py-sm bg-secondary-container rounded-lg hover:bg-tertiary-fixed-dim transition-colors text-on-secondary-container font-label-bold text-label-bold shadow-sm">
+<span class="material-symbols-outlined text-[20px]">download</span>
+        Export Data
+      </button>
+<button class="flex-1 md:flex-none flex items-center justify-center gap-xs px-md py-sm bg-primary rounded-lg hover:bg-tertiary-container transition-colors text-on-primary font-label-bold text-label-bold shadow-md">
+<span class="material-symbols-outlined text-[20px]">person_add</span>
+        Add New Entry
+      </button>
+</div>
+</div>
+<!-- Search & Filter Controls -->
+<div class="flex flex-col bg-surface-container-lowest shadow-sm rounded-xl p-md gap-md relative overflow-hidden">
+<!-- Decorative Background element -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary-fixed-dim/20 rounded-full blur-[80px] -mr-32 -mt-32 pointer-events-none"></div>
+<div class="flex flex-col lg:flex-row gap-sm z-10 relative">
+<div class="relative flex-1 flex items-center">
+<span class="material-symbols-outlined absolute left-sm text-outline">search</span>
+<input class="w-full pl-xl pr-md py-sm bg-surface-container-low rounded-lg text-body-md focus:outline-none focus:ring-1 focus:ring-primary shadow-inner" placeholder="Search by name, case ID, or physical description..." type="text"/>
+</div>
+<div class="flex gap-sm overflow-x-auto pb-2 lg:pb-0 hide-scrollbar shrink-0">
+<button class="flex items-center gap-xs px-sm py-xs bg-primary-container text-on-primary-container rounded-full font-label-sm text-label-sm whitespace-nowrap shadow-sm">
+          Status: Active <span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+<button class="flex items-center gap-xs px-sm py-xs bg-surface-container text-on-surface rounded-full font-label-sm text-label-sm whitespace-nowrap hover:bg-surface-variant transition-colors shadow-sm">
+          Location: All <span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
+</button>
+<button class="flex items-center gap-xs px-sm py-xs bg-surface-container text-on-surface rounded-full font-label-sm text-label-sm whitespace-nowrap hover:bg-surface-variant transition-colors shadow-sm">
+          Date: Last 30 Days <span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
+</button>
+<button class="flex items-center gap-xs px-sm py-xs bg-surface-container text-on-surface rounded-full font-label-sm text-label-sm whitespace-nowrap hover:bg-surface-variant transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[16px]">tune</span> More Filters
+        </button>
+</div>
+</div>
+</div>
+<!-- Data Table Section -->
+<div class="bg-surface-container-lowest shadow-md rounded-xl overflow-hidden flex flex-col z-10">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-bold text-label-bold uppercase tracking-wider border-b border-surface-variant">
+<th class="p-sm pl-md font-medium w-16">Photo</th>
+<th class="p-sm font-medium min-w-[200px]">Subject Details</th>
+<th class="p-sm font-medium">Demographics</th>
+<th class="p-sm font-medium">Missing Since</th>
+<th class="p-sm font-medium min-w-[250px]">Last Known Location</th>
+<th class="p-sm font-medium w-32">Status</th>
+<th class="p-sm pr-md font-medium text-right w-16">Actions</th>
+</tr>
+</thead>
+<tbody class="text-body-md font-body-md text-on-surface divide-y divide-surface-variant/50">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors group">
+<td class="p-sm pl-md">
+<img class="w-10 h-10 rounded-full object-cover shadow-sm" data-alt="Close-up portrait of a young hispanic male with short dark hair, serious expression, wearing a grey hoodie, dramatic lighting, law enforcement case file style photo." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVzFtN5pLntfiq2-hdR4vadg9pE0TBAa5-6V5lZi8WGzFO67c1ISnA2yZAnNg_SrsyrL0Xn6sKRjzgY96Kn4fX-eOd9tfrEGBaVXv4A51Z5nLI4oT26m7T-usJAPqRKcoF6vTEKVBwxUKcURN1OghdpgU2ujynM54EKsTGu2DvGzh00v3MJIY6RQ8EKYfBPYB-7xpKknAiv4yfewnUWBPv_kBEFQ3sT_kbanPvNnEE1Bcu-xFMQYRryg"/>
+</td>
+<td class="p-sm">
+<div class="flex flex-col">
+<span class="font-headline-sm text-on-surface text-[16px] leading-tight group-hover:text-primary transition-colors">Mateo Reyes</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant mt-1">ID: #MP-24-0891</span>
+</div>
+</td>
+<td class="p-sm text-on-surface-variant">
+              17 yrs • M • 5'9"
+            </td>
+<td class="p-sm">
+<div class="flex flex-col">
+<span class="text-on-surface">Oct 12, 2023</span>
+<span class="text-on-surface-variant text-label-sm">14 Days Ago</span>
+</div>
+</td>
+<td class="p-sm text-on-surface-variant flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px] text-outline">location_on</span>
+<span class="truncate max-w-[200px]">Downtown Transit Center, Sector 4</span>
+</td>
+<td class="p-sm">
+<span class="inline-flex items-center px-2 py-1 rounded-md bg-error/10 text-error font-label-bold text-[10px] uppercase tracking-wide">
+<span class="w-1.5 h-1.5 rounded-full bg-error mr-1.5 animate-pulse"></span> Active Alert
+              </span>
+</td>
+<td class="p-sm pr-md text-right">
+<button class="p-xs text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors group bg-surface-bright">
+<td class="p-sm pl-md">
+<img class="w-10 h-10 rounded-full object-cover shadow-sm" data-alt="Portrait of an elderly caucasian woman with white hair, glasses, gentle smile, wearing a blue floral blouse, soft daylight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmBqxkZnGby7rzupo2Cy4Mg2jUwvPca4waDz4wIz_IX9mUSaY2_Pup2gAnv3pEz-TaCo9YMKV5h1I-LeOOhPmBIKcUB7Kqbik72qXwHVbM5EnnuqDE9wgjzYsKsxquw74rZhnb5nqlR_Ei-zUekw6Y2qK4inchBmeKRnwWHwcBuPLCwoDH0ai-4Yc9RbwCyyzrUEKTgWSWMuhR1k_e3PFt7MUko2XY87h3_FkuDeX5EL50m1zHYF4rlA"/>
+</td>
+<td class="p-sm">
+<div class="flex flex-col">
+<span class="font-headline-sm text-on-surface text-[16px] leading-tight group-hover:text-primary transition-colors">Eleanor Vance</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant mt-1">ID: #MP-24-0842</span>
+</div>
+</td>
+<td class="p-sm text-on-surface-variant">
+              78 yrs • F • 5'2"
+            </td>
+<td class="p-sm">
+<div class="flex flex-col">
+<span class="text-on-surface">Oct 24, 2023</span>
+<span class="text-on-surface-variant text-label-sm">2 Days Ago</span>
+</div>
+</td>
+<td class="p-sm text-on-surface-variant flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px] text-outline">location_on</span>
+<span class="truncate max-w-[200px]">Pinecrest Nursing Facility (Wandering)</span>
+</td>
+<td class="p-sm">
+<span class="inline-flex items-center px-2 py-1 rounded-md bg-error/10 text-error font-label-bold text-[10px] uppercase tracking-wide">
+<span class="w-1.5 h-1.5 rounded-full bg-error mr-1.5 animate-pulse"></span> Active Alert
+              </span>
+</td>
+<td class="p-sm pr-md text-right">
+<button class="p-xs text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors group opacity-75">
+<td class="p-sm pl-md">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-outline">person</span>
+</div>
+</td>
+<td class="p-sm">
+<div class="flex flex-col">
+<span class="font-headline-sm text-on-surface text-[16px] leading-tight group-hover:text-primary transition-colors">David Chen</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant mt-1">ID: #MP-24-0711</span>
+</div>
+</td>
+<td class="p-sm text-on-surface-variant">
+              34 yrs • M • 6'1"
+            </td>
+<td class="p-sm">
+<div class="flex flex-col">
+<span class="text-on-surface">Sep 05, 2023</span>
+<span class="text-on-surface-variant text-label-sm">Resolved</span>
+</div>
+</td>
+<td class="p-sm text-on-surface-variant flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px] text-outline">location_on</span>
+<span class="truncate max-w-[200px]">Riverside Park Trailhead</span>
+</td>
+<td class="p-sm">
+<span class="inline-flex items-center px-2 py-1 rounded-md bg-surface-variant text-on-surface-variant font-label-bold text-[10px] uppercase tracking-wide">
+                Found Safe
+              </span>
+</td>
+<td class="p-sm pr-md text-right">
+<button class="p-xs text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors group bg-surface-bright">
+<td class="p-sm pl-md">
+<img class="w-10 h-10 rounded-full object-cover shadow-sm" data-alt="Portrait of an African American female in her twenties, long braided hair, wearing a yellow jacket, neutral expression, documentary style photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVC-pR3Z3T9YELE8OOViqCkcgInyOMCBg7IpzT1jRRJ0xcmZOxdOiQtjEtvMh9FQyzHtJJs1qCdaSAdWoo_mxOcoyy1RaSMqVe7yYimmXELZZ76Z75JDcvVcg-QPJPH8L9mGcMFvtqLbqtgsC2_BRec5UBGxsECYR9RoT2y4AagiwOx2AFzs1kb_y1JoM1wwmGOxlfpEUxsettvyj4hdrr0480gEuI3MeraSIjx8znDdUisUOdVQwW7g"/>
+</td>
+<td class="p-sm">
+<div class="flex flex-col">
+<span class="font-headline-sm text-on-surface text-[16px] leading-tight group-hover:text-primary transition-colors">Aaliyah Jenkins</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant mt-1">ID: #MP-24-0899</span>
+</div>
+</td>
+<td class="p-sm text-on-surface-variant">
+              22 yrs • F • 5'6"
+            </td>
+<td class="p-sm">
+<div class="flex flex-col">
+<span class="text-on-surface">Oct 26, 2023</span>
+<span class="text-on-surface-variant text-label-sm">Today</span>
+</div>
+</td>
+<td class="p-sm text-on-surface-variant flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px] text-outline">location_on</span>
+<span class="truncate max-w-[200px]">State University Campus, South Lot</span>
+</td>
+<td class="p-sm">
+<span class="inline-flex items-center px-2 py-1 rounded-md bg-secondary-container text-on-secondary-container font-label-bold text-[10px] uppercase tracking-wide">
+                Pending Verification
+              </span>
+</td>
+<td class="p-sm pr-md text-right">
+<button class="p-xs text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="bg-surface-container-low p-sm px-md flex items-center justify-between border-t border-surface-variant text-label-sm text-on-surface-variant">
+<span>Showing 1-4 of 124 records</span>
+<div class="flex gap-xs">
+<button class="p-xs rounded hover:bg-surface-container transition-colors disabled:opacity-50" disabled=""><span class="material-symbols-outlined text-[20px]">chevron_left</span></button>
+<button class="w-8 h-8 rounded bg-primary text-on-primary font-label-bold shadow-sm">1</button>
+<button class="w-8 h-8 rounded hover:bg-surface-container transition-colors">2</button>
+<button class="w-8 h-8 rounded hover:bg-surface-container transition-colors">3</button>
+<span class="px-2 self-center">...</span>
+<button class="w-8 h-8 rounded hover:bg-surface-container transition-colors">12</button>
+<button class="p-xs rounded hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[20px]">chevron_right</span></button>
+</div>
+</div>
+</div>
+</div></main></div></body></html>
