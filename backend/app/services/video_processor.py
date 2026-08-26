@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+import gc
 
 import cv2
 
@@ -22,6 +23,8 @@ class VideoProcessorService:
     6. Save detection results to Supabase
     7. Create alerts for matches
     8. Mark CCTV job as complete / failed
+
+    Memory optimized for low-memory deployment environments.
     """
 
     # ---------------------------------------------------------
@@ -33,24 +36,22 @@ class VideoProcessorService:
         """
         Convert datetime to PostgreSQL-safe UTC timestamp.
 
-        IMPORTANT:
-        Never create values like:
-
-            2026-08-22T00:00:00+00:00Z
-
-        because that contains both +00:00 and Z.
-
-        We always return:
-
+        Returns:
             2026-08-22T00:00:00Z
         """
 
         if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
+            dt = dt.replace(
+                tzinfo=timezone.utc
+            )
 
-        dt = dt.astimezone(timezone.utc)
+        dt = dt.astimezone(
+            timezone.utc
+        )
 
-        return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+        return dt.strftime(
+            "%Y-%m-%dT%H:%M:%SZ"
+        )
 
     # ---------------------------------------------------------
     # PROCESS CCTV VIDEO
@@ -75,6 +76,7 @@ class VideoProcessorService:
         cap = None
 
         try:
+
             # -------------------------------------------------
             # JOB → EXTRACTING
             # -------------------------------------------------
@@ -90,7 +92,9 @@ class VideoProcessorService:
             # OPEN VIDEO
             # -------------------------------------------------
 
-            cap = cv2.VideoCapture(video_path)
+            cap = cv2.VideoCapture(
+                video_path
+            )
 
             if not cap.isOpened():
 
@@ -102,7 +106,8 @@ class VideoProcessorService:
                     job_id,
                     {
                         "status": "failed",
-                        "error_message": error_message,
+                        "error_message":
+                            error_message,
                     },
                 )
 
@@ -137,7 +142,7 @@ class VideoProcessorService:
             )
 
             print(
-                f"[VideoProcessor] Total frames: "
+                "[VideoProcessor] Total frames: "
                 f"{total_frame_count}"
             )
 
@@ -176,11 +181,16 @@ class VideoProcessorService:
             db.update_cctv_job(
                 job_id,
                 {
-                    "total_frames": total_frame_count,
-                    "processed_frames": 0,
-                    "faces_detected": 0,
-                    "matches_found": 0,
-                    "status": "extracting",
+                    "total_frames":
+                        total_frame_count,
+                    "processed_frames":
+                        0,
+                    "faces_detected":
+                        0,
+                    "matches_found":
+                        0,
+                    "status":
+                        "extracting",
                 },
             )
 
@@ -195,23 +205,33 @@ class VideoProcessorService:
                 ).strip()
 
                 # Handle Z correctly.
-                if capture_value.endswith("Z"):
+                if capture_value.endswith(
+                    "Z"
+                ):
+
                     capture_value = (
                         capture_value[:-1]
                         + "+00:00"
                     )
 
-                capture_dt = datetime.fromisoformat(
-                    capture_value
+                capture_dt = (
+                    datetime.fromisoformat(
+                        capture_value
+                    )
                 )
 
                 if capture_dt.tzinfo is None:
-                    capture_dt = capture_dt.replace(
-                        tzinfo=timezone.utc
+
+                    capture_dt = (
+                        capture_dt.replace(
+                            tzinfo=timezone.utc
+                        )
                     )
 
-                capture_dt = capture_dt.astimezone(
-                    timezone.utc
+                capture_dt = (
+                    capture_dt.astimezone(
+                        timezone.utc
+                    )
                 )
 
             except Exception as exc:
@@ -221,8 +241,10 @@ class VideoProcessorService:
                     f"time '{capture_time_str}': {exc}"
                 )
 
-                capture_dt = datetime.now(
-                    timezone.utc
+                capture_dt = (
+                    datetime.now(
+                        timezone.utc
+                    )
                 )
 
             # -------------------------------------------------
@@ -259,9 +281,9 @@ class VideoProcessorService:
                 if not ret:
                     break
 
-                # ---------------------------------------------
+                # -------------------------------------------------
                 # SAMPLE FRAME
-                # ---------------------------------------------
+                # -------------------------------------------------
 
                 if (
                     frame_idx
@@ -271,9 +293,9 @@ class VideoProcessorService:
 
                     processed_frames += 1
 
-                    # -----------------------------------------
+                    # ---------------------------------------------
                     # UPDATE PROGRESS
-                    # -----------------------------------------
+                    # ---------------------------------------------
 
                     db.update_cctv_job(
                         job_id,
@@ -293,9 +315,9 @@ class VideoProcessorService:
                         },
                     )
 
-                    # -----------------------------------------
+                    # ---------------------------------------------
                     # LOG PROGRESS
-                    # -----------------------------------------
+                    # ---------------------------------------------
 
                     print(
                         "[VideoProcessor] Processing "
@@ -303,9 +325,9 @@ class VideoProcessorService:
                         f"{total_frame_count}"
                     )
 
-                    # -----------------------------------------
+                    # ---------------------------------------------
                     # FACE DETECTION
-                    # -----------------------------------------
+                    # ---------------------------------------------
 
                     faces = (
                         face_engine.detect_faces(
@@ -315,16 +337,24 @@ class VideoProcessorService:
 
                     if not faces:
 
+                        del faces
+
                         frame_idx += 1
+
+                        # Release current frame.
+                        del frame
+
+                        gc.collect()
+
                         continue
 
                     faces_detected_count += len(
                         faces
                     )
 
-                    # -----------------------------------------
+                    # ---------------------------------------------
                     # FRAME TIMESTAMP
-                    # -----------------------------------------
+                    # ---------------------------------------------
 
                     frame_dt = (
                         capture_dt
@@ -335,16 +365,15 @@ class VideoProcessorService:
                         )
                     )
 
-                    # PostgreSQL-safe timestamp.
                     frame_timestamp = (
                         self._format_timestamp(
                             frame_dt
                         )
                     )
 
-                    # -----------------------------------------
+                    # ---------------------------------------------
                     # PROCESS EACH FACE
-                    # -----------------------------------------
+                    # ---------------------------------------------
 
                     for (
                         x,
@@ -353,131 +382,240 @@ class VideoProcessorService:
                         h,
                     ) in faces:
 
-                        face_crop = (
-                            face_engine.extract_face_crop(
-                                frame,
-                                (
-                                    x,
-                                    y,
-                                    w,
-                                    h,
-                                ),
+                        face_crop = None
+                        embedding = None
+                        annotated_frame = None
+                        saved_frame_url = None
+                        detection_results = None
+
+                        try:
+
+                            # -------------------------------------
+                            # EXTRACT FACE
+                            # -------------------------------------
+
+                            face_crop = (
+                                face_engine.extract_face_crop(
+                                    frame,
+                                    (
+                                        x,
+                                        y,
+                                        w,
+                                        h,
+                                    ),
+                                )
                             )
-                        )
 
-                        if (
-                            face_crop is None
-                            or face_crop.size == 0
-                        ):
-                            continue
-                        print(
-    f"[VideoProcessor] Generating embedding for frame {frame_idx}"
-)
+                            if (
+                                face_crop is None
+                                or face_crop.size == 0
+                            ):
+                                continue
 
-                        embedding = (
-                            face_engine.generate_embedding(
-                                face_crop
+                            print(
+                                "[VideoProcessor] "
+                                f"Generating embedding for "
+                                f"frame {frame_idx}"
                             )
-                        )
-                        print(
-    f"[VideoProcessor] Embedding generated for frame {frame_idx}"
-)
 
-                        if (
-                            not embedding
-                            or len(embedding) != 512
-                        ):
-                            continue
+                            # -------------------------------------
+                            # GENERATE EMBEDDING
+                            # -------------------------------------
 
-                        # -------------------------------------
-                        # ONLY MATCH IF ACTIVE PERSONS EXIST
-                        # -------------------------------------
-
-                        if not active_persons:
-                            continue
-
-                        # -------------------------------------
-                        # SAVE ANNOTATED FRAME
-                        # -------------------------------------
-
-                        annotated_frame = (
-                            frame.copy()
-                        )
-
-                        cv2.rectangle(
-                            annotated_frame,
-                            (x, y),
-                            (
-                                x + w,
-                                y + h,
-                            ),
-                            (0, 32, 96),
-                            2,
-                        )
-                        print(
-    f"[VideoProcessor] Saving annotated frame {frame_idx}"
-)
-
-                        saved_frame_url = (
-                            storage.save_frame(
-                                annotated_frame,
-                                f"job_{job_id[:6]}",
-                                frame_idx,
-                            )
-                        )
-                        print(
-    f"[VideoProcessor] Frame {frame_idx} saved: {saved_frame_url}"
-)
-
-                        # -------------------------------------
-                        # MATCH FACE
-                        # -------------------------------------
-                        print(
-    f"[VideoProcessor] Starting face matching for frame {frame_idx}"
-)
-
-                        detection_results = (
-                            matcher.evaluate_detected_faces(
-                                detected_embedding=embedding,
-                                active_persons=active_persons,
-                                frame_url=saved_frame_url,
-                                location=location,
-                                camera_id=camera_id,
-                                detected_at=frame_timestamp,
-                                cctv_job_id=job_id,
-                                bbox={
-                                    "x": int(x),
-                                    "y": int(y),
-                                    "w": int(w),
-                                    "h": int(h),
-                                },
-                            )
-                        )
-                        print(
-    f"[VideoProcessor] Face matching finished for frame {frame_idx}"
-)
-
-                        if detection_results:
-
-                            matches_found_count += len(
-                                detection_results
+                            embedding = (
+                                face_engine.generate_embedding(
+                                    face_crop
+                                )
                             )
 
                             print(
                                 "[VideoProcessor] "
-                                f"{len(detection_results)} match(es) recorded."
+                                f"Embedding generated for "
+                                f"frame {frame_idx}"
                             )
 
-                            # Update immediately.
-                            db.update_cctv_job(
-                                job_id,
-                                {
-                                    "faces_detected":
-                                        faces_detected_count,
-                                    "matches_found":
-                                        matches_found_count,
-                                },
+                            if (
+                                not embedding
+                                or len(embedding) != 512
+                            ):
+                                continue
+
+                            # -------------------------------------
+                            # ONLY MATCH IF ACTIVE PERSONS EXIST
+                            # -------------------------------------
+
+                            if not active_persons:
+                                continue
+
+                            # -------------------------------------
+                            # SAVE ANNOTATED FRAME
+                            # -------------------------------------
+
+                            annotated_frame = (
+                                frame.copy()
                             )
+
+                            cv2.rectangle(
+                                annotated_frame,
+                                (x, y),
+                                (
+                                    x + w,
+                                    y + h,
+                                ),
+                                (0, 32, 96),
+                                2,
+                            )
+
+                            print(
+                                "[VideoProcessor] "
+                                f"Saving annotated frame "
+                                f"{frame_idx}"
+                            )
+
+                            saved_frame_url = (
+                                storage.save_frame(
+                                    annotated_frame,
+                                    f"job_{job_id[:6]}",
+                                    frame_idx,
+                                )
+                            )
+
+                            print(
+                                "[VideoProcessor] "
+                                f"Frame {frame_idx} saved: "
+                                f"{saved_frame_url}"
+                            )
+
+                            # -------------------------------------
+                            # RELEASE ANNOTATED FRAME
+                            # -------------------------------------
+
+                            del annotated_frame
+                            annotated_frame = None
+
+                            gc.collect()
+
+                            # -------------------------------------
+                            # MATCH FACE
+                            # -------------------------------------
+
+                            print(
+                                "[VideoProcessor] "
+                                "Starting face matching "
+                                f"for frame {frame_idx}"
+                            )
+
+                            detection_results = (
+                                matcher.evaluate_detected_faces(
+                                    detected_embedding=
+                                        embedding,
+                                    active_persons=
+                                        active_persons,
+                                    frame_url=
+                                        saved_frame_url,
+                                    location=
+                                        location,
+                                    camera_id=
+                                        camera_id,
+                                    detected_at=
+                                        frame_timestamp,
+                                    cctv_job_id=
+                                        job_id,
+                                    bbox={
+                                        "x": int(x),
+                                        "y": int(y),
+                                        "w": int(w),
+                                        "h": int(h),
+                                    },
+                                )
+                            )
+
+                            print(
+                                "[VideoProcessor] "
+                                "Face matching finished "
+                                f"for frame {frame_idx}"
+                            )
+
+                            # -------------------------------------
+                            # HANDLE MATCHES
+                            # -------------------------------------
+
+                            if detection_results:
+
+                                matches_found_count += (
+                                    len(
+                                        detection_results
+                                    )
+                                )
+
+                                print(
+                                    "[VideoProcessor] "
+                                    f"{len(detection_results)} "
+                                    "match(es) recorded."
+                                )
+
+                                db.update_cctv_job(
+                                    job_id,
+                                    {
+                                        "faces_detected":
+                                            faces_detected_count,
+                                        "matches_found":
+                                            matches_found_count,
+                                    },
+                                )
+
+                        except Exception as face_exc:
+
+                            print(
+                                "[VideoProcessor] "
+                                f"Face processing error "
+                                f"on frame {frame_idx}: "
+                                f"{face_exc}"
+                            )
+
+                        finally:
+
+                            # -------------------------------------
+                            # RELEASE TEMPORARY FACE OBJECTS
+                            # -------------------------------------
+
+                            if face_crop is not None:
+                                del face_crop
+
+                            if embedding is not None:
+                                del embedding
+
+                            if annotated_frame is not None:
+                                del annotated_frame
+
+                            if detection_results is not None:
+                                del detection_results
+
+                            if saved_frame_url is not None:
+                                del saved_frame_url
+
+                            gc.collect()
+
+                            print(
+                                "[VideoProcessor] "
+                                "Memory cleanup completed "
+                                f"for frame {frame_idx}"
+                            )
+
+                    # -------------------------------------------------
+                    # RELEASE FACE DETECTION RESULTS
+                    # -------------------------------------------------
+
+                    del faces
+                    gc.collect()
+
+                # -------------------------------------------------
+                # RELEASE CURRENT VIDEO FRAME
+                # -------------------------------------------------
+
+                del frame
+
+                gc.collect()
 
                 frame_idx += 1
 
@@ -488,6 +626,8 @@ class VideoProcessorService:
             cap.release()
             cap = None
 
+            gc.collect()
+
             # -------------------------------------------------
             # JOB COMPLETE
             # -------------------------------------------------
@@ -495,14 +635,16 @@ class VideoProcessorService:
             db.update_cctv_job(
                 job_id,
                 {
-                    "status": "complete",
+                    "status":
+                        "complete",
                     "processed_frames":
                         processed_frames,
                     "faces_detected":
                         faces_detected_count,
                     "matches_found":
                         matches_found_count,
-                    "error_message": None,
+                    "error_message":
+                        None,
                 },
             )
 
@@ -539,15 +681,13 @@ class VideoProcessorService:
                 f"{error_message}"
             )
 
-            # Make absolutely sure the job doesn't remain
-            # stuck at "pending" or "extracting".
-
             try:
 
                 db.update_cctv_job(
                     job_id,
                     {
-                        "status": "failed",
+                        "status":
+                            "failed",
                         "error_message":
                             error_message,
                     },
@@ -575,6 +715,8 @@ class VideoProcessorService:
                     cap.release()
                 except Exception:
                     pass
+
+            gc.collect()
 
 
 # -------------------------------------------------------------

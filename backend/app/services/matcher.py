@@ -19,10 +19,10 @@ class MatcherService:
 
     Duplicate protection:
         1. Prevents duplicate detections inside the same CCTV job.
-        2. Prevents new detections for a person who already has
-           a pending or verified detection from an earlier job.
-        3. Allows a new detection after an earlier detection
-           has been rejected.
+        2. Allows the same missing person to be detected again
+           in a different CCTV job.
+        3. Verification/rejection of an old detection does NOT
+           disable future CCTV matching.
     """
 
     # ---------------------------------------------------------
@@ -73,7 +73,6 @@ class MatcherService:
                 / (norm_a * norm_b)
             )
 
-            # Keep similarity inside [0, 1]
             similarity = max(
                 0.0,
                 min(1.0, similarity),
@@ -106,21 +105,28 @@ class MatcherService:
         try:
             value = str(timestamp).strip()
 
+            # Example:
             # 2026-08-22T00:00:00+00:00Z
             if value.endswith("Z") and "+" in value:
                 value = value[:-1]
 
+            # Example:
             # 2026-08-22T00:00:00Z
             elif value.endswith("Z"):
-                value = value[:-1] + "+00:00"
+                value = (
+                    value[:-1]
+                    + "+00:00"
+                )
 
-            parsed = datetime.fromisoformat(value)
+            parsed = datetime.fromisoformat(
+                value
+            )
 
             return parsed.isoformat()
 
         except Exception as exc:
             print(
-                f"[Matcher] Timestamp normalization failed: "
+                "[Matcher] Timestamp normalization failed: "
                 f"{timestamp} | {exc}"
             )
 
@@ -137,8 +143,14 @@ class MatcherService:
     ) -> Optional[Dict[str, Any]]:
         """
         Prevents the same person from generating multiple
-        detection cards from different frames of the same
+        detection records from different frames of the SAME
         CCTV job.
+
+        IMPORTANT:
+        This only checks the current CCTV job.
+
+        A detection from another CCTV job does NOT block
+        a new detection.
         """
 
         try:
@@ -147,8 +159,13 @@ class MatcherService:
             if not detections:
                 return None
 
-            target_person_id = str(person_id)
-            target_job_id = str(cctv_job_id)
+            target_person_id = str(
+                person_id
+            )
+
+            target_job_id = str(
+                cctv_job_id
+            )
 
             for detection in detections:
 
@@ -178,74 +195,7 @@ class MatcherService:
 
         except Exception as exc:
             print(
-                f"[Matcher] Existing detection lookup failed: "
-                f"{exc}"
-            )
-
-            return None
-
-    # ---------------------------------------------------------
-    # EXISTING ACTIVE DETECTION - ALL JOBS
-    # ---------------------------------------------------------
-
-    def _find_existing_active_detection(
-        self,
-        person_id: str,
-    ) -> Optional[Dict[str, Any]]:
-        """
-        Finds an existing pending or verified detection for
-        the same missing person.
-
-        Rejected detections are ignored so that the person can
-        be matched again in a future CCTV job.
-        """
-
-        try:
-            detections = db.get_detections()
-
-            if not detections:
-                return None
-
-            target_person_id = str(person_id)
-
-            active_detections = []
-
-            for detection in detections:
-
-                detection_person_id = str(
-                    detection.get(
-                        "person_id",
-                        "",
-                    )
-                )
-
-                if detection_person_id != target_person_id:
-                    continue
-
-                status = str(
-                    detection.get(
-                        "verification_status",
-                        "pending",
-                    )
-                ).lower()
-
-                if status in {
-                    "pending",
-                    "verified",
-                }:
-                    active_detections.append(
-                        detection
-                    )
-
-            if not active_detections:
-                return None
-
-            # get_detections() is already ordered newest first.
-            return active_detections[0]
-
-        except Exception as exc:
-            print(
-                f"[Matcher] Active detection lookup failed: "
+                "[Matcher] Existing detection lookup failed: "
                 f"{exc}"
             )
 
@@ -267,14 +217,26 @@ class MatcherService:
         bbox: Optional[Dict[str, int]] = None,
     ) -> List[Dict[str, Any]]:
         """
-        Compare one detected CCTV face against ALL active persons
-        and return every match above the configured threshold.
+        Compare one detected CCTV face against ALL active persons.
+
+        A person can be detected again in another CCTV job.
+
+        Only duplicate detections inside the SAME CCTV job
+        are prevented.
         """
 
-        if not detected_embedding or not active_persons:
+        if (
+            not detected_embedding
+            or not active_persons
+        ):
             return []
 
         matches = []
+
+        print(
+            "[Matcher] Comparing CCTV face against "
+            f"{len(active_persons)} active persons..."
+        )
 
         for person in active_persons:
 
@@ -283,33 +245,49 @@ class MatcherService:
             if not person_id:
                 continue
 
-            # Avoid duplicate detection in same CCTV job.
-            if self._find_existing_detection(
-                person_id=person_id,
-                cctv_job_id=cctv_job_id,
-            ):
+            # -------------------------------------------------
+            # SAME-JOB DUPLICATE PROTECTION
+            # -------------------------------------------------
+
+            existing_detection = (
+                self._find_existing_detection(
+                    person_id=person_id,
+                    cctv_job_id=cctv_job_id,
+                )
+            )
+
+            if existing_detection:
+
+                print(
+                    "[Matcher] Same-job duplicate skipped: "
+                    f"{person.get('name', 'Unknown')} "
+                    f"already detected in job "
+                    f"{str(cctv_job_id)[:8]}"
+                )
+
                 continue
 
-            # Avoid duplicate pending/verified detections
-            # from previous jobs.
-            if self._find_existing_active_detection(
-                person_id=person_id,
-            ):
-                continue
+            # -------------------------------------------------
+            # MATCH THIS PERSON
+            # -------------------------------------------------
 
-            detection = self._evaluate_single_match(
-                detected_embedding=detected_embedding,
-                active_persons=[person],
-                frame_url=frame_url,
-                location=location,
-                camera_id=camera_id,
-                detected_at=detected_at,
-                cctv_job_id=cctv_job_id,
-                bbox=bbox,
+            detection = (
+                self._evaluate_single_match(
+                    detected_embedding=detected_embedding,
+                    active_persons=[person],
+                    frame_url=frame_url,
+                    location=location,
+                    camera_id=camera_id,
+                    detected_at=detected_at,
+                    cctv_job_id=cctv_job_id,
+                    bbox=bbox,
+                )
             )
 
             if detection:
-                matches.append(detection)
+                matches.append(
+                    detection
+                )
 
         return matches
 
@@ -359,12 +337,15 @@ class MatcherService:
         bbox: Optional[Dict[str, int]] = None,
     ) -> Optional[Dict[str, Any]]:
         """
-        Compare one detected CCTV face against all active
-        missing persons.
+        Compare one detected CCTV face against the supplied
+        active persons.
 
         IMPORTANT:
-        This version logs every similarity score so we can
-        diagnose why a CCTV face is or is not being matched.
+        This function does NOT block a person because of a
+        previous pending/verified detection.
+
+        A previous detection from another CCTV job is simply
+        another sighting.
         """
 
         # -----------------------------------------------------
@@ -372,23 +353,30 @@ class MatcherService:
         # -----------------------------------------------------
 
         if not detected_embedding:
+
             print(
                 "[Matcher] Empty detected embedding."
             )
+
             return None
 
         if not active_persons:
+
             print(
                 "[Matcher] No active persons available."
             )
+
             return None
 
         # FaceNet must return 512 dimensions.
+
         if len(detected_embedding) != 512:
+
             print(
                 "[Matcher] Invalid detected embedding dimension:",
                 len(detected_embedding),
             )
+
             return None
 
         # -----------------------------------------------------
@@ -396,15 +384,22 @@ class MatcherService:
         # -----------------------------------------------------
 
         try:
-            settings_data = db.get_settings()
+
+            settings_data = (
+                db.get_settings()
+            )
 
         except Exception as exc:
+
             print(
-                f"[Matcher] Could not load settings: {exc}"
+                "[Matcher] Could not load settings: "
+                f"{exc}"
             )
+
             settings_data = {}
 
         try:
+
             similarity_threshold = float(
                 settings_data.get(
                     "similarity_threshold",
@@ -416,9 +411,11 @@ class MatcherService:
             TypeError,
             ValueError,
         ):
+
             similarity_threshold = 0.80
 
         try:
+
             alert_threshold = float(
                 settings_data.get(
                     "alert_threshold",
@@ -430,9 +427,13 @@ class MatcherService:
             TypeError,
             ValueError,
         ):
+
             alert_threshold = 0.90
 
-        # Safety bounds.
+        # -----------------------------------------------------
+        # SAFETY BOUNDS
+        # -----------------------------------------------------
+
         similarity_threshold = max(
             0.0,
             min(
@@ -505,7 +506,7 @@ class MatcherService:
 
                 print(
                     f"[Matcher] SKIP {person_name}: "
-                    f"invalid embedding dimension "
+                    "invalid embedding dimension "
                     f"{len(person_embedding)}."
                 )
 
@@ -515,9 +516,11 @@ class MatcherService:
             # CALCULATE SIMILARITY
             # -------------------------------------------------
 
-            score = self.compute_cosine_similarity(
-                detected_embedding,
-                person_embedding,
+            score = (
+                self.compute_cosine_similarity(
+                    detected_embedding,
+                    person_embedding,
+                )
             )
 
             # -------------------------------------------------
@@ -525,7 +528,7 @@ class MatcherService:
             # -------------------------------------------------
 
             print(
-                f"[Matcher] Similarity: "
+                "[Matcher] Similarity: "
                 f"{person_name} "
                 f"(ID: {person_id}) = "
                 f"{score:.4f} "
@@ -540,7 +543,9 @@ class MatcherService:
 
                 best_score = score
 
-                best_match_person = person
+                best_match_person = (
+                    person
+                )
 
         # -----------------------------------------------------
         # BEST MATCH DEBUG
@@ -593,16 +598,18 @@ class MatcherService:
         # MATCH ACCEPTED
         # -----------------------------------------------------
 
-        person_id = best_match_person.get(
-            "id"
+        person_id = (
+            best_match_person.get("id")
         )
 
         if not person_id:
             return None
 
-        person_name = best_match_person.get(
-            "name",
-            "Unknown",
+        person_name = (
+            best_match_person.get(
+                "name",
+                "Unknown",
+            )
         )
 
         print(
@@ -612,7 +619,14 @@ class MatcherService:
         )
 
         # -----------------------------------------------------
-        # PREVENT DUPLICATE - SAME JOB
+        # SAME-JOB DUPLICATE PROTECTION
+        # -----------------------------------------------------
+        #
+        # IMPORTANT:
+        # We ONLY block the same person if they already have
+        # a detection in THIS CCTV job.
+        #
+        # We intentionally DO NOT check previous jobs.
         # -----------------------------------------------------
 
         existing_detection = (
@@ -625,47 +639,12 @@ class MatcherService:
         if existing_detection:
 
             print(
-                f"[Matcher] Duplicate prevented: "
+                "[Matcher] Same-job duplicate prevented: "
                 f"{person_name} already matched "
                 f"in job {str(cctv_job_id)[:8]}"
             )
 
-            return existing_detection
-
-        # -----------------------------------------------------
-        # PREVENT DUPLICATE - PREVIOUS JOBS
-        # -----------------------------------------------------
-
-        existing_active_detection = (
-            self._find_existing_active_detection(
-                person_id=person_id,
-            )
-        )
-
-        if existing_active_detection:
-
-            existing_status = str(
-                existing_active_detection.get(
-                    "verification_status",
-                    "pending",
-                )
-            ).lower()
-
-            existing_job = str(
-                existing_active_detection.get(
-                    "cctv_job_id",
-                    "",
-                )
-            )
-
-            print(
-                f"[Matcher] Cross-job duplicate prevented: "
-                f"{person_name} already has "
-                f"{existing_status} detection "
-                f"from job {existing_job[:8]}"
-            )
-
-            return existing_active_detection
+            return None
 
         # -----------------------------------------------------
         # CONFIDENCE
@@ -713,31 +692,41 @@ class MatcherService:
         # -----------------------------------------------------
 
         detection_data = {
-            "person_id": person_id,
 
-            "person_name": person_name,
+            "person_id":
+                person_id,
 
-            "person_photo": (
+            "person_name":
+                person_name,
+
+            "person_photo":
                 best_match_person.get(
                     "photo_url"
-                )
-            ),
+                ),
 
-            "cctv_job_id": cctv_job_id,
+            "cctv_job_id":
+                cctv_job_id,
 
-            "confidence": confidence,
+            "confidence":
+                confidence,
 
-            "frame_url": frame_url,
+            "frame_url":
+                frame_url,
 
-            "location": location,
+            "location":
+                location,
 
-            "camera_id": camera_id,
+            "camera_id":
+                camera_id,
 
-            "detected_at": normalized_detected_at,
+            "detected_at":
+                normalized_detected_at,
 
-            "verification_status": "pending",
+            "verification_status":
+                "pending",
 
-            "bounding_box": bbox,
+            "bounding_box":
+                bbox,
         }
 
         try:
@@ -751,13 +740,14 @@ class MatcherService:
         except Exception as exc:
 
             print(
-                f"[Matcher] Failed to create detection: "
+                "[Matcher] Failed to create detection: "
                 f"{exc}"
             )
 
             raise
 
         if not detection_record:
+
             return None
 
         print(
@@ -773,28 +763,28 @@ class MatcherService:
         if confidence >= alert_threshold:
 
             alert_data = {
-                "detection_id": (
-                    detection_record["id"]
-                ),
 
-                "case_id": (
+                "detection_id":
+                    detection_record["id"],
+
+                "case_id":
                     best_match_person[
                         "case_id"
-                    ]
-                ),
+                    ],
 
-                "title": (
-                    "High-confidence match"
-                ),
+                "title":
+                    "High-confidence match",
 
-                "detail": (
-                    f"{person_name} — "
-                    f"{percentage}% at "
-                    f"{location} "
-                    f"({camera_id})."
-                ),
+                "detail":
+                    (
+                        f"{person_name} — "
+                        f"{percentage}% at "
+                        f"{location} "
+                        f"({camera_id})."
+                    ),
 
-                "severity": "critical",
+                "severity":
+                    "critical",
             }
 
             try:
@@ -811,38 +801,38 @@ class MatcherService:
 
             except Exception as exc:
 
-                # Detection already exists, so alert failure
-                # should not destroy the result.
+                # Detection already exists.
+                # Alert failure should not destroy the result.
 
                 print(
-                    f"[Matcher] Alert creation failed: "
+                    "[Matcher] Alert creation failed: "
                     f"{exc}"
                 )
 
         else:
 
             alert_data = {
-                "detection_id": (
-                    detection_record["id"]
-                ),
 
-                "case_id": (
+                "detection_id":
+                    detection_record["id"],
+
+                "case_id":
                     best_match_person[
                         "case_id"
-                    ]
-                ),
+                    ],
 
-                "title": (
-                    "Pending verification"
-                ),
+                "title":
+                    "Pending verification",
 
-                "detail": (
-                    f"{person_name} — "
-                    f"{percentage}% at "
-                    f"{location}."
-                ),
+                "detail":
+                    (
+                        f"{person_name} — "
+                        f"{percentage}% at "
+                        f"{location}."
+                    ),
 
-                "severity": "high",
+                "severity":
+                    "high",
             }
 
             try:
@@ -860,7 +850,7 @@ class MatcherService:
             except Exception as exc:
 
                 print(
-                    f"[Matcher] Alert creation failed: "
+                    "[Matcher] Alert creation failed: "
                     f"{exc}"
                 )
 
